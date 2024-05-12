@@ -23,17 +23,6 @@ interface ToastProps {
   zIndex: number
 }
 
-let idCounter = 0
-function getId(): string {
-  return `toast-${idCounter++}`
-}
-
-export function toast(payload: Omit<Toast, 'id'>): string {
-  const id = getId()
-  useNotificationStore.getState().add({ id, ...payload })
-  return id
-}
-
 export function ToastController({ id }: ToastControllerProps) {
   const toasts = useNotificationStore((state) => state.notifications[id] || [])
   const remove = useNotificationStore((state) => state.remove)
