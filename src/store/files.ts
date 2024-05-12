@@ -65,7 +65,6 @@ export const useFileStore = create<FileStateStore>((set) => ({
         try {
           if (xhr.status === 200) {
             const data = JSON.parse(xhr.response)
-            console.log('xhr.data.files', data.files)
 
             set((state) => {
               const newFiles = [
@@ -169,7 +168,6 @@ export const useFileStore = create<FileStateStore>((set) => ({
       const response = await fetch(`/api/file/${id}`, {
         method: 'DELETE',
       })
-      console.log('delete response', response)
       if (!response.ok) {
         throw new Error('Network response was not ok')
       }

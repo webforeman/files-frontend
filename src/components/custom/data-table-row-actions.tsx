@@ -38,7 +38,6 @@ export function DataTableRowActions<TData>({
         <DropdownMenuItem
           className="cursor-pointer"
           onClick={() => {
-            console.log('download', row.getValue('id'))
             downloadFile(row.getValue('id'))
           }}
         >
@@ -47,7 +46,6 @@ export function DataTableRowActions<TData>({
         <DropdownMenuItem
           className="cursor-pointer"
           onClick={() => {
-            console.log('delete')
             deleteFile(row.getValue('id'))
           }}
         >

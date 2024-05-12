@@ -41,7 +41,6 @@ export default function FileUploader() {
     try {
       const newFiles = Array.from(e.target.files as FileList) as File[]
       const validFiles = newFiles.filter((file) => file.size <= MAX_FILE_SIZE)
-      console.log('validFiles', validFiles)
       if (validFiles.length + inputFiles.length > MAX_FILES) {
         throw new Error(`Maximum number of files: ${MAX_FILES}.`)
       }
@@ -85,9 +84,7 @@ export default function FileUploader() {
   }, [])
 
   useEffect(() => {
-    console.log('uploadProgress', uploadProgress)
     if (uploadProgress === 100) {
-      console.log('finish uploadProgress', uploadProgress)
       timeoutRef.current = setTimeout(() => {
         setInputFiles([])
         if (fileInputRef.current) {
