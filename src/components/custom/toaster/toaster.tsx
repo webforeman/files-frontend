@@ -9,7 +9,7 @@ import {
   Title,
   Viewport,
 } from '@radix-ui/react-toast'
-import { Toast } from '@/store/notify'
+import type { Toast } from '@/store/notify'
 import styles from './toaster.module.css'
 import { cn } from '@/lib/utils'
 
