@@ -5,30 +5,27 @@ import { Button } from '@/components/ui/button'
 import { useState, useRef, useEffect } from 'react'
 import * as Progress from '@radix-ui/react-progress'
 import { X } from 'lucide-react'
-import useFileStore from '@/store'
+import { useFileStore } from '@/store/files'
+import { useProgressStore } from '@/store/progress'
+import { useErrorStore } from '@/store/errors'
 
 export default function FileUploader() {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [inputFiles, setInputFiles] = useState<File[]>([])
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
 
-  const {
-    files,
-    uploadFiles,
-    initializeCryptoOperations,
-    uploadProgress,
-    error,
-  } = useFileStore((state) => ({
-    error: state.error,
-    files: state.files,
-    uploadProgress: state.uploadProgress,
-    uploadFiles: state.uploadFiles,
-    initializeCryptoOperations: state.initializeCryptoOperations,
+  const MAX_FILES = 100 // Maximum number of files
+  const MAX_FILE_SIZE = 256 * 1024 * 1024 // Maximum file size in bytes
+  const { uploadProgress } = useProgressStore((state) => state)
+  const { addError, clearErrors } = useErrorStore((state) => ({
+    addError: state.addError,
+    clearErrors: state.clearErrors,
   }))
 
-  useEffect(() => {
-    initializeCryptoOperations()
-  }, [initializeCryptoOperations])
+  const { uploadFiles } = useFileStore((state) => ({
+    files: state.files,
+    uploadFiles: state.uploadFiles,
+  }))
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault()
@@ -41,8 +38,24 @@ export default function FileUploader() {
   }
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newFiles = Array.from(e.target.files as FileList) as File[]
-    setInputFiles((prevFiles) => [...prevFiles, ...newFiles])
+    try {
+      const newFiles = Array.from(e.target.files as FileList) as File[]
+      const validFiles = newFiles.filter((file) => file.size <= MAX_FILE_SIZE)
+      console.log('validFiles', validFiles)
+      if (validFiles.length + inputFiles.length > MAX_FILES) {
+        throw new Error(`Maximum number of files: ${MAX_FILES}.`)
+      }
+      if (newFiles.some((file) => file.size > MAX_FILE_SIZE)) {
+        throw new Error(`Maximum file size: ${MAX_FILE_SIZE / 1024 / 1024} Mb.`)
+      }
+      setInputFiles((prevFiles) => [...prevFiles, ...newFiles])
+    } catch (error) {
+      addError(error as Error)
+      // Clear input field
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ''
+      }
+    }
   }
 
   const handleRemoveFile = (name: string) => {
@@ -58,6 +71,7 @@ export default function FileUploader() {
 
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault()
+    clearErrors()
     await uploadFiles(inputFiles)
   }
 
@@ -83,18 +97,6 @@ export default function FileUploader() {
     }
   }, [uploadProgress])
 
-  useEffect(() => {
-    console.log('inputFiles', inputFiles)
-  }, [inputFiles])
-
-  useEffect(() => {
-    console.log('files', files)
-  }, [files])
-
-  useEffect(() => {
-    console.log('error', error)
-  }, [error])
-
   return (
     <form
       id="uploadZipForm"
@@ -114,7 +116,8 @@ export default function FileUploader() {
                 Drag and drop file or click to select
               </span>
               <span className="text-xs text-gray-500">
-                Only ZIP files are supported
+                Only ZIP files are supported (Max file size 256 MB, Max file
+                count 100)
               </span>
             </div>
           </Label>
@@ -165,9 +168,6 @@ export default function FileUploader() {
                   />
                 </Progress.Root>
               </div>
-              {error && (
-                <div className=" my-2 text-red-500">{error?.message}</div>
-              )}
               <ul className="space-y-2">
                 {inputFiles.map((file) => (
                   <li

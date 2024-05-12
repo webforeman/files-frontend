@@ -2,7 +2,7 @@ import { ClientLayout } from '@/components/custom/client-layout'
 import { columns } from '@/components/custom/columns'
 import { DataTable } from '@/components/custom/data-table'
 import { Button } from '@/components/ui/button'
-import useFileStore from '@/store'
+import { useFileStore } from '@/store/files'
 import { useNavigate } from 'react-router-dom'
 
 export default function FilesPage() {
@@ -12,10 +12,7 @@ export default function FilesPage() {
     navigate('/')
   }
 
-  const { files } = useFileStore((state) => ({
-    error: state.error,
-    files: state.files,
-  }))
+  const { files } = useFileStore()
 
   return (
     <ClientLayout>

@@ -14,7 +14,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import useFileStore from '@/store'
 
 interface DataTablePaginationProps<TData> {
   table: Table<TData>
@@ -23,32 +22,11 @@ interface DataTablePaginationProps<TData> {
 export function DataTablePagination<TData>({
   table,
 }: DataTablePaginationProps<TData>) {
-  const { downloadZip } = useFileStore((state) => ({
-    downloadZip: state.downloadZip,
-  }))
   return (
-    <div className="flex items-center justify-between px-2">
+    <div className="flex items-center justify-between px-2 flex-wrap">
       <div className="flex-1 text-sm text-muted-foreground">
         {table.getFilteredSelectedRowModel().rows.length} of{' '}
         {table.getFilteredRowModel().rows.length} row(s) selected.
-        <Button
-          variant="outline"
-          size="sm"
-          className="my-2 hidden h-8 lg:flex"
-          disabled={table.getFilteredSelectedRowModel().rows.length === 0}
-          onClick={() => {
-            const selected: { original: TData }[] =
-              table.getFilteredSelectedRowModel().rows
-            downloadZip(
-              selected.map(
-                ({ original }: { original: TData }) =>
-                  (original as { id: number })?.id
-              )
-            )
-          }}
-        >
-          Download selected files
-        </Button>
       </div>
       <div className="flex items-center space-x-6 lg:space-x-8">
         <div className="flex items-center space-x-2">

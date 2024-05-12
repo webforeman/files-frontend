@@ -9,7 +9,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import useFileStore from '@/store'
+import { useFileStore } from '@/store/files'
 
 interface DataTableRowActionsProps<TData> {
   row: Row<TData>

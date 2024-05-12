@@ -4,10 +4,11 @@ import { File, Files, Upload } from 'lucide-react'
 
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
-import useFileStore from '@/store'
+import { useFileStore } from '@/store/files'
 
 export default function Sidebar() {
-  const { files } = useFileStore((state) => ({ files: state.files }))
+  const { files } = useFileStore()
+
   return (
     <div className="hidden border-r bg-muted/40 md:block">
       <div className="flex h-full max-h-screen flex-col gap-2">
