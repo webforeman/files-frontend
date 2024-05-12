@@ -33,7 +33,7 @@ const useFileStore = create<FileState>((set, get) => ({
   uploadProgress: 0,
   fetchFiles: async () => {
     try {
-      const response = await fetch('http://localhost:4200/api/files')
+      const response = await fetch('/api/files')
       if (!response.ok) {
         throw new Error('Network response was not ok')
       }
@@ -68,7 +68,7 @@ const useFileStore = create<FileState>((set, get) => ({
 
       const xhr = new XMLHttpRequest()
 
-      xhr.open('POST', `http://localhost:4200/api/upload`, true)
+      xhr.open('POST', `/api/upload`, true)
 
       xhr.upload.onprogress = function (event) {
         if (event.lengthComputable) {
@@ -122,7 +122,7 @@ const useFileStore = create<FileState>((set, get) => ({
   },
   downloadFile: async (id: number) => {
     try {
-      const response = await fetch(`http://localhost:4200/api/file/${id}`)
+      const response = await fetch(`/api/file/${id}`)
       if (!response.ok) {
         throw new Error('Failed to download file')
       }
@@ -163,7 +163,7 @@ const useFileStore = create<FileState>((set, get) => ({
     try {
       // Изменение курсора на всей странице
       document.body.style.cursor = 'wait'
-      const response = await fetch('http://localhost:4200/api/files/zip', {
+      const response = await fetch('/api/files/zip', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -195,7 +195,7 @@ const useFileStore = create<FileState>((set, get) => ({
   },
   deleteFile: async (id: number) => {
     try {
-      const response = await fetch(`http://localhost:4200/api/file/${id}`, {
+      const response = await fetch(`/api/file/${id}`, {
         method: 'DELETE',
       })
       console.log('delete response', response)
