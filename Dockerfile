@@ -19,24 +19,40 @@ RUN npm run build
 
 # Указывается базовый образ для этапа продакшена
 # ---- Runtime Stage ----
-FROM node:20-alpine AS production
+# FROM node:20-alpine AS production
 
 # Устанавливается рабочая директория в контейнере
-WORKDIR /usr/src/app
+# WORKDIR /usr/src/app
 
 # Копируются файлы package.json и package-lock.json в рабочую директорию
-COPY package*.json .
+# COPY package*.json .
 
 # Выполняется установка только production зависимостей и очистка кэша npm
-RUN npm ci --only=production && \
-    npm cache clean --force
+# RUN npm ci --only=production && \
+#     npm cache clean --force
 
 # Установка serve для изолированного запуска приложения
-RUN npm install -g serve
+# RUN npm install -g serve
 
 # Копируется собранный код из этапа сборки в рабочую директорию этапа продакшена
-COPY --from=build /usr/src/app/dist ./dist
+# COPY --from=build /usr/src/app/dist ./dist
 
 # Может быть задана команда, которая будет выполнена при запуске контейнера
-EXPOSE 3000
-CMD ["serve", "-s", "dist", "-l", "3000"]
+# EXPOSE 3000
+# CMD ["serve", "-s", "dist", "-l", "3000"]
+
+FROM nginx:alpine AS production
+
+WORKDIR /usr/share/nginx/html
+
+# Удаление всех стандартных файлов Nginx
+RUN rm -rf ./*
+
+# Копирование собранных файлов из этапа сборки
+COPY --from=build /usr/src/app/dist .
+
+# Копирование или создание конфигурационного файла Nginx
+COPY nginx.conf /etc/nginx/nginx.conf
+
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
