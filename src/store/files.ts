@@ -19,12 +19,10 @@ interface FileStateStore {
   deleteFile: (id: number) => Promise<void>
 }
 
-const { addError, clearErrors } = useErrorStore.getState()
-
 export const useFileStore = create<FileStateStore>((set) => ({
   files: [],
   fetchFiles: async () => {
-    clearErrors() // Clear errors before fetching files
+    useErrorStore.getState().clearErrors() // Clear errors before fetching files
     try {
       const response = await fetch('/api/files')
       if (!response.ok) {
@@ -34,11 +32,11 @@ export const useFileStore = create<FileStateStore>((set) => ({
       set({ files: data })
     } catch (error) {
       console.error(error)
-      addError(error as Error)
+      useErrorStore.getState().addError(error as Error)
     }
   },
   uploadFiles: async (files: File[]) => {
-    clearErrors() // Clear errors before uploading files
+    useErrorStore.getState().clearErrors() // Clear errors before uploading files
     const { setUploadProgress } = useProgressStore.getState()
     setUploadProgress(0) // Start progress
     try {
@@ -85,26 +83,26 @@ export const useFileStore = create<FileStateStore>((set) => ({
           }
         } catch (error) {
           console.error(error)
-          addError(error as Error)
+          useErrorStore.getState().addError(error as Error)
         }
       }
 
       xhr.onerror = function () {
         const error = new Error('Network error occurred')
         console.error(error)
-        addError(error as Error)
+        useErrorStore.getState().addError(error as Error)
       }
 
       xhr.send(formData)
       setUploadProgress(100)
     } catch (error) {
       console.error(error)
-      addError(error as Error)
+      useErrorStore.getState().addError(error as Error)
       setUploadProgress(0)
     }
   },
   downloadFile: async (id: number) => {
-    clearErrors()
+    useErrorStore.getState().clearErrors()
     try {
       const response = await fetch(`/api/file/${id}`)
       if (!response.ok) {
@@ -124,11 +122,11 @@ export const useFileStore = create<FileStateStore>((set) => ({
       a.remove()
     } catch (error) {
       console.error(error)
-      addError(error as Error)
+      useErrorStore.getState().addError(error as Error)
     }
   },
   downloadZip: async (ids: number[]) => {
-    clearErrors()
+    useErrorStore.getState().clearErrors()
     try {
       // Change cursor to all page
       document.body.style.cursor = 'wait'
@@ -157,13 +155,13 @@ export const useFileStore = create<FileStateStore>((set) => ({
       a.remove()
     } catch (error) {
       console.error('Error downloading zip:', error)
-      addError(error as Error)
+      useErrorStore.getState().addError(error as Error)
       // Reset cursor to default
       document.body.style.cursor = 'default'
     }
   },
   deleteFile: async (id: number) => {
-    clearErrors()
+    useErrorStore.getState().clearErrors()
     try {
       const response = await fetch(`/api/file/${id}`, {
         method: 'DELETE',
@@ -174,7 +172,7 @@ export const useFileStore = create<FileStateStore>((set) => ({
       set((state) => ({ files: state.files.filter((file) => file.id !== id) }))
     } catch (error) {
       console.error(error)
-      addError(error as Error)
+      useErrorStore.getState().addError(error as Error)
     }
   },
 }))
