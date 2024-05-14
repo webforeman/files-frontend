@@ -13,10 +13,14 @@ export default function FileUploader() {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [inputFiles, setInputFiles] = useState<File[]>([])
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const [isUploading, setIsUploading] = useState(false)
 
   const MAX_FILES = 100 // Maximum number of files
   const MAX_FILE_SIZE = 256 * 1024 * 1024 // Maximum file size in bytes
-  const { uploadProgress } = useProgressStore((state) => state)
+  const { uploadProgress, resetUploadProgress } = useProgressStore((state) => ({
+    uploadProgress: state.uploadProgress,
+    resetUploadProgress: state.resetUploadProgress,
+  }))
   const { addError, clearErrors } = useErrorStore((state) => ({
     addError: state.addError,
     clearErrors: state.clearErrors,
@@ -70,8 +74,10 @@ export default function FileUploader() {
 
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault()
+    setIsUploading(true)
     clearErrors()
     await uploadFiles(inputFiles)
+    setIsUploading(false)
   }
 
   useEffect(() => {
@@ -84,15 +90,17 @@ export default function FileUploader() {
   }, [])
 
   useEffect(() => {
+    setIsUploading(uploadProgress > 0 && uploadProgress < 100)
     if (uploadProgress === 100) {
       timeoutRef.current = setTimeout(() => {
         setInputFiles([])
         if (fileInputRef.current) {
           fileInputRef.current.value = ''
         }
+        resetUploadProgress()
       }, 300)
     }
-  }, [uploadProgress])
+  }, [uploadProgress, resetUploadProgress])
 
   return (
     <form
@@ -135,12 +143,16 @@ export default function FileUploader() {
         </CardContent>
         <CardFooter className="flex-col">
           <Button
-            className={inputFiles.length === 0 ? 'cursor-not-allowed' : ''}
+            className={
+              inputFiles.length === 0 || isUploading ? 'cursor-not-allowed' : ''
+            }
             size="lg"
-            disabled={inputFiles.length === 0 || uploadProgress > 0}
+            disabled={
+              inputFiles.length === 0 || isUploading || uploadProgress > 0
+            }
             type="submit"
             onClick={
-              inputFiles.length > 0 && uploadProgress === 0
+              inputFiles.length > 0 && (uploadProgress && !isUploading) === 0
                 ? handleUpload
                 : () => {}
             }
@@ -155,9 +167,8 @@ export default function FileUploader() {
                   value={Math.round(uploadProgress)}
                 >
                   <Progress.Indicator
-                    className="w-full h-full transition-transform duration-150 ease-in"
+                    className="w-full h-full transition-transform duration-300 ease-in-out bg-[hsl(var(--primary))]"
                     style={{
-                      background: 'hsl(var(--primary))',
                       transform: `translateX(-${
                         100 - Math.round(uploadProgress)
                       }%)`,
