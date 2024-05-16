@@ -43,8 +43,12 @@ export const useFileStore = create<FileStateStore>((set) => ({
       const formData = new FormData()
 
       for (const file of files) {
-        formData.append('files', new Blob([file]), file.name)
-        formData.append('fileNames', file.name)
+        formData.append(
+          'files',
+          new Blob([file]),
+          encodeURIComponent(file.name)
+        )
+        formData.append('fileNames', encodeURIComponent(file.name))
         formData.append('filesLastModified', file.lastModified.toString())
       }
 
