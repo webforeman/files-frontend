@@ -78,6 +78,7 @@ export const useFileStore = create<FileStateStore>((set) => ({
                     )
                 ), // Добавляем только те файлы из state.files, которых нет в data.files по свойству name
               ]
+              setUploadProgress(100)
               return {
                 files: newFiles,
               }
@@ -98,7 +99,6 @@ export const useFileStore = create<FileStateStore>((set) => ({
       }
 
       xhr.send(formData)
-      setUploadProgress(100)
     } catch (error) {
       console.error(error)
       useErrorStore.getState().addError(error as Error)

@@ -38,18 +38,35 @@ export default function FileUploader() {
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault()
     const newFiles = Array.from(e.dataTransfer.files)
-    setInputFiles((prevFiles) => [...prevFiles, ...newFiles])
+    const validFiles = newFiles.filter((file) =>
+      ['zip', 'application/zip', 'application/x-zip-compressed'].includes(
+        file.type
+      )
+    )
+    if (validFiles.length !== newFiles.length) {
+      addError(new Error('Only ZIP files are supported.'))
+    }
+    setInputFiles((prevFiles) => [...prevFiles, ...validFiles])
   }
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     try {
       const newFiles = Array.from(e.target.files as FileList) as File[]
-      const validFiles = newFiles.filter((file) => file.size <= MAX_FILE_SIZE)
+      const validFiles = newFiles.filter(
+        (file) =>
+          file.size <= MAX_FILE_SIZE &&
+          ['application/zip', 'application/x-zip-compressed'].includes(
+            file.type
+          )
+      )
       if (validFiles.length + inputFiles.length > MAX_FILES) {
         throw new Error(`Maximum number of files: ${MAX_FILES}.`)
       }
       if (newFiles.some((file) => file.size > MAX_FILE_SIZE)) {
         throw new Error(`Maximum file size: ${MAX_FILE_SIZE / 1024 / 1024} Mb.`)
+      }
+      if (validFiles.length !== newFiles.length) {
+        throw new Error('Only ZIP files are supported.')
       }
       setInputFiles((prevFiles) => [...prevFiles, ...newFiles])
     } catch (error) {
@@ -76,8 +93,15 @@ export default function FileUploader() {
     e.preventDefault()
     setIsUploading(true)
     clearErrors()
-    await uploadFiles(inputFiles)
-    setIsUploading(false)
+
+    try {
+      await uploadFiles(inputFiles)
+    } catch (error) {
+      setIsUploading(false)
+      addError(error as Error)
+    } finally {
+      setIsUploading(false)
+    }
   }
 
   useEffect(() => {
